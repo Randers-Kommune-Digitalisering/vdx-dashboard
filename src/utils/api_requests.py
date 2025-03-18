@@ -26,7 +26,7 @@ class APIClient:
 
     def _authenticate(self):
         if self.api_key:
-            return {'Authorization': f'Bearer {self.api_key}'}
+            return {'x-api-key {self.api_key}'}
         elif self.client_id and self.client_secret:
             if not self.realm:
                 raise ValueError('Realm is required for client_id and client_secret authentication')
