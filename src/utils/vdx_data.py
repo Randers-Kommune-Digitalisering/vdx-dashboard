@@ -8,8 +8,7 @@ api_client = APIClient(base_url=VDX_API_URL, api_key=VDX_API_KEY, use_bearer=Tru
 def get_vdx_data():
     try:
         query_params = {
-            'start_time__gte': '2025-01-01T00:00:00Z',
-            'limit': 100000
+            'start_time__gte': '2024-01-01T00:00:00Z',
         }
         response = api_client.make_request(method='get', params=query_params)
         if response:
