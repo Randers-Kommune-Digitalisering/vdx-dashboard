@@ -102,6 +102,8 @@ def get_video_calls():
             vdx_data['Month'] = vdx_data['start_time'].dt.month
             vdx_data['Månedsdag'] = vdx_data['start_time'].dt.day.astype(int)
 
+            month_names = {1: 'Januar', 2: 'Februar', 3: 'Marts', 4: 'April', 5: 'Maj', 6: 'Juni', 7: 'Juli', 8: 'August', 9: 'September', 10: 'Oktober', 11: 'November', 12: 'December'}
+
             col1, col2 = st.columns(2)
             with col1:
                 selected_year_month = st.selectbox(
@@ -115,7 +117,7 @@ def get_video_calls():
             with col2:
                 filtered_result_year = vdx_data[vdx_data['Year'] == selected_year_month]
                 unique_months = filtered_result_year['Month'].sort_values().unique()
-                selected_month = st.selectbox('Vælg en måned', unique_months, help="Vælg den måned, for hvilken du vil se dataene.")
+                selected_month = st.selectbox('Vælg en måned', unique_months, format_func=lambda x: month_names[x], help="Vælg den måned, for hvilken du vil se dataene.")
 
             month_data = filtered_result_year[filtered_result_year['Month'] == selected_month].groupby(['Month', 'Månedsdag']).size().reset_index(name='Antal møder')
 
@@ -124,7 +126,7 @@ def get_video_calls():
             with col1:
                 ui.metric_card(title="Samlet antal møder (Måned)", content=int(total_calls_month), description="Antal møder, der blev afholdt i den valgte måned.")
 
-            st.write(f"## Antal af Møder (Måned) - {selected_year_month}, Måned {selected_month}")
+            st.write(f"## Antal af Møder (Måned) - {selected_year_month}, Måned {month_names[selected_month]}")
             month_chart = alt.Chart(month_data).mark_bar().encode(
                 x=alt.X('Månedsdag:O', title='Månedsdag', axis=alt.Axis(format='d')),
                 y=alt.Y('Antal møder:Q', title='Antal møder'),
