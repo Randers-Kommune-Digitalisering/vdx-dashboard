@@ -43,3 +43,19 @@ def extract_organizers_from_email(email):
         if len(name_parts) >= 2:
             return f"{name_parts[0].capitalize()} {name_parts[1].capitalize()}"
     return email
+
+
+def get_quality_mapping():
+    quality_mapping = {
+        '0_unknown': 'Ukendt',
+        '1_good': 'God',
+        '2_ok': 'Ok'
+    }
+    return quality_mapping
+
+
+def get_quality_percent(overall_quality_summary, quality):
+    if quality in overall_quality_summary['overall_quality'].values:
+        return overall_quality_summary.loc[overall_quality_summary['overall_quality'] == quality, 'overall_quality_percent'].values[0]
+    else:
+        return 0.0
