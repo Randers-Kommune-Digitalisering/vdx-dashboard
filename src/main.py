@@ -4,6 +4,7 @@ from utils.logo import get_logo
 from page.video_calls import get_video_calls
 from page.video_organizers import get_video_calls_organizers
 from page.video_quality import get_video_calls_quality
+from page.video_duration import get_video_calls_duration
 
 st.set_page_config(page_title="VDX Management Dashboard", page_icon="assets/favicon.ico")
 
@@ -29,6 +30,6 @@ if selected == "Antal Video Møder":
 elif selected == "Organisator Overblik":
     get_video_calls_organizers()
 elif selected == "Varighed af Video Møde":
-    st.write("Varighed af Video Møde")
+    get_video_calls_duration()
 elif selected == "Video Møde Kvalitet":
     get_video_calls_quality()
