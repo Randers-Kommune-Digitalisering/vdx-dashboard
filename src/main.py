@@ -2,6 +2,7 @@ import streamlit as st
 from streamlit_option_menu import option_menu
 from utils.logo import get_logo
 from page.video_calls import get_video_calls
+from page.video_organizers import get_video_calls_organizers
 
 st.set_page_config(page_title="VDX Management Dashboard", page_icon="assets/favicon.ico")
 
@@ -9,7 +10,7 @@ with st.sidebar:
     st.sidebar.markdown(get_logo(), unsafe_allow_html=True)
     selected = option_menu(
         "VDX Management Dashboard",
-        ["Antal Video Møder", "Antal Deltager", "Varighed af Opkald", "Feedback på kvaliteten"],
+        ["Antal Video Møder", "Organisator Overblik", "Varighed af Opkald", "Feedback på kvaliteten"],
         default_index=0,
         icons=['bi-calendar-check', 'bi-bar-chart', 'bi-bar-chart', 'bi-bar-chart'],
         menu_icon="bi-camera-video",
@@ -24,8 +25,8 @@ with st.sidebar:
 
 if selected == "Antal Video Møder":
     get_video_calls()
-elif selected == "Antal Deltager":
-    st.write("Antal Deltager")
+elif selected == "Organisator Overblik":
+    get_video_calls_organizers()
 elif selected == "Varighed af Opkald":
     st.write("Varighed af Opkald")
 elif selected == "Feedback på kvaliteten":
