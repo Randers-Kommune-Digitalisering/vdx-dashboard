@@ -2,6 +2,8 @@ from utils.api_requests import APIClient
 from utils.config import VDX_API_URL, VDX_API_KEY
 import pandas as pd
 import streamlit as st
+import re
+
 api_client = APIClient(base_url=VDX_API_URL, api_key=VDX_API_KEY, use_bearer=True)
 
 
@@ -32,3 +34,12 @@ def retrieve_weekday_names():
         'Sunday': 'Søndag'
     }
     return weekday
+
+
+def extract_organizers_from_email(email):
+    match = re.match(r'([^@]+)@', email)
+    if match:
+        name_parts = match.group(1).split('.')
+        if len(name_parts) >= 2:
+            return f"{name_parts[0].capitalize()} {name_parts[1].capitalize()}"
+    return email
