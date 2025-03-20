@@ -59,3 +59,7 @@ def get_quality_percent(overall_quality_summary, quality):
         return overall_quality_summary.loc[overall_quality_summary['overall_quality'] == quality, 'overall_quality_percent'].values[0]
     else:
         return 0.0
+
+
+def format_duration(seconds):
+    return f"{seconds//3600}:{(seconds % 3600)//60:02}:{seconds % 60:02}"
