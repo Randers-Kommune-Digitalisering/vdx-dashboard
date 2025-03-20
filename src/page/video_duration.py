@@ -55,7 +55,7 @@ def get_video_calls_duration():
                 st.write(f"## Gennemsnitlig varighed af Møder (Dag) - {selected_date}")
                 day_chart = alt.Chart(interval_data).mark_bar().encode(
                     x=alt.X('TimeInterval:T', title='Tidspunkt', axis=alt.Axis(format='%H:%M')),
-                    y=alt.Y('Gennemsnitlig varighed:Q', title='Gennemsnitlig varighed (minutter)', scale=alt.Scale(domain=[0, interval_data['Gennemsnitlig varighed'].max()/60])),
+                    y=alt.Y('Gennemsnitlig varighed:Q', title='Gennemsnitlig varighed (minutter)', scale=alt.Scale(domain=[0, interval_data['Gennemsnitlig varighed'].max() / 60])),
                     tooltip=[alt.Tooltip('TimeInterval:T', title='Tidspunkt', format='%H:%M'), alt.Tooltip('Gennemsnitlig varighed:Q', title='Gennemsnitlig varighed', format='.2f')]
                 ).transform_calculate(
                     "Gennemsnitlig varighed", "datum['Gennemsnitlig varighed'] / 60"
@@ -97,7 +97,7 @@ def get_video_calls_duration():
             st.write(f"## Gennemsnitlig varighed af Møder (Uge) - {selected_year_week}, Uge {selected_week}")
             week_chart = alt.Chart(week_data_grouped).mark_bar().encode(
                 x=alt.X('Weekday', title='Ugedag', sort=['Mandag', 'Tirsdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lørdag', 'Søndag']),
-                y=alt.Y('Gennemsnitlig varighed:Q', title='Gennemsnitlig varighed (minutter)', scale=alt.Scale(domain=[0, week_data_grouped['Gennemsnitlig varighed'].max()/60])),
+                y=alt.Y('Gennemsnitlig varighed:Q', title='Gennemsnitlig varighed (minutter)', scale=alt.Scale(domain=[0, week_data_grouped['Gennemsnitlig varighed'].max() / 60])),
                 tooltip=[alt.Tooltip('Weekday', title='Ugedag'), alt.Tooltip('Gennemsnitlig varighed:Q', title='Gennemsnitlig varighed', format='.2f')]
             ).transform_calculate(
                 "Gennemsnitlig varighed", "datum['Gennemsnitlig varighed'] / 60"
@@ -141,7 +141,7 @@ def get_video_calls_duration():
             st.write(f"## Gennemsnitlig varighed af Møder (Måned) - {selected_year_month}, Måned {month_names[selected_month]}")
             month_chart = alt.Chart(month_data_grouped).mark_bar().encode(
                 x=alt.X('Månedsdag:O', title='Månedsdag', axis=alt.Axis(format='d')),
-                y=alt.Y('Gennemsnitlig varighed:Q', title='Gennemsnitlig varighed (minutter)', scale=alt.Scale(domain=[0, month_data_grouped['Gennemsnitlig varighed'].max()/60])),
+                y=alt.Y('Gennemsnitlig varighed:Q', title='Gennemsnitlig varighed (minutter)', scale=alt.Scale(domain=[0, month_data_grouped['Gennemsnitlig varighed'].max() / 60])),
                 tooltip=[alt.Tooltip('Månedsdag:O', title='Månedsdag'), alt.Tooltip('Gennemsnitlig varighed:Q', title='Gennemsnitlig varighed', format='.2f')]
             ).transform_calculate(
                 "Gennemsnitlig varighed", "datum['Gennemsnitlig varighed'] / 60"
