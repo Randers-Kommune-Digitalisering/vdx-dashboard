@@ -4,7 +4,7 @@ from utils.config import API_SERVICE_URL
 
 
 @st.cache_data
-def get_user_locations():
+def get_user_department():
     try:
         client = APIClient(base_url=API_SERVICE_URL)
         response = client.make_request(path="api/azure/user-department", method="get")
