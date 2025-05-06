@@ -23,3 +23,4 @@ DB_NAME = os.environ.get('DB_NAME')
 
 VDX_API_KEY = os.environ['VDX_API_KEY']
 VDX_API_URL = os.environ['VDX_API_URL']
+API_SERVICE_URL = os.environ['API_SERVICE_URL']
