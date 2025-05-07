@@ -4,6 +4,7 @@ import pandas as pd
 import altair as alt
 import streamlit_shadcn_ui as ui
 from utils.vdx_data import get_vdx_data, get_quality_mapping, get_quality_percent
+from utils.azure_ad_data import get_user_department
 
 
 def get_video_calls_quality():
@@ -11,7 +12,7 @@ def get_video_calls_quality():
 
     with col_1:
         content_tabs = sac.tabs([
-            sac.TabsItem('Kvalitet', tag='Kvalitet'),
+            sac.TabsItem('Kvalitet', tag='Kvalitet', icon='bi bi-patch-check'),
         ], color='dark', size='md', position='top', align='start', use_container_width=True)
 
     try:
@@ -28,6 +29,36 @@ def get_video_calls_quality():
         vdx_data['Year'] = vdx_data['start_time'].dt.year
         vdx_data['Month'] = vdx_data['start_time'].dt.month
         vdx_data['Månedsdag'] = vdx_data['start_time'].dt.day.astype(int)
+
+        user_departments = get_user_department()
+        if not user_departments:
+            st.warning("Ingen afdelinger fundet.")
+            return
+
+        for user in user_departments:
+            user['mail'] = user['mail'].lower()
+
+        vdx_data['meeting_organized_by_name'] = vdx_data['meeting_organized_by_name'].str.lower()
+
+        valid_departments = set(
+            user['officeLocation'] for user in user_departments
+            if user['mail'] in vdx_data['meeting_organized_by_name'].values
+        )
+        department_options = ["Alle afdelinger"] + list(valid_departments)
+
+        selected_department = st.selectbox("Vælg en afdeling", department_options, help="Vælg en afdeling for at filtrere data.")
+
+        if selected_department != "Alle afdelinger":
+            department_users = [user['mail'] for user in user_departments if user['officeLocation'] == selected_department]
+            filtered_data = vdx_data[vdx_data['meeting_organized_by_name'].isin(department_users)]
+
+            employee_options = ["Alle medarbejdere"] + list(set(filtered_data['meeting_organized_by_name']))
+            selected_employee = st.selectbox("Vælg en medarbejder", employee_options, help="Vælg en medarbejder for at filtrere data.")
+
+            if selected_employee != "Alle medarbejdere":
+                vdx_data = filtered_data[filtered_data['meeting_organized_by_name'] == selected_employee]
+            else:
+                vdx_data = filtered_data
 
         month_names = {1: 'Januar', 2: 'Februar', 3: 'Marts', 4: 'April', 5: 'Maj', 6: 'Juni', 7: 'Juli', 8: 'August', 9: 'September', 10: 'Oktober', 11: 'November', 12: 'December'}
 
