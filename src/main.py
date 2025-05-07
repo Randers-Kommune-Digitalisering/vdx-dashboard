@@ -2,7 +2,6 @@ import streamlit as st
 from streamlit_option_menu import option_menu
 from utils.logo import get_logo
 from page.video_calls import get_video_calls
-from page.video_organizers import get_video_calls_organizers
 from page.video_quality import get_video_calls_quality
 from page.video_duration import get_video_calls_duration
 
@@ -12,7 +11,7 @@ with st.sidebar:
     st.sidebar.markdown(get_logo(), unsafe_allow_html=True)
     selected = option_menu(
         "VDX Management Dashboard",
-        ["Antal Video Møder", "Organisator Overblik", "Varighed af Video Møde", "Video Møde Kvalitet"],
+        ["Antal Video Møder", "Varighed af Video Møde", "Video Møde Kvalitet"],
         default_index=0,
         icons=['bi-calendar-check', 'bi-person-lines-fill', 'bi-clock', 'bi-graph-up-arrow'],
         menu_icon="bi-camera-video",
@@ -27,8 +26,6 @@ with st.sidebar:
 
 if selected == "Antal Video Møder":
     get_video_calls()
-elif selected == "Organisator Overblik":
-    get_video_calls_organizers()
 elif selected == "Varighed af Video Møde":
     get_video_calls_duration()
 elif selected == "Video Møde Kvalitet":
