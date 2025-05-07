@@ -14,9 +14,9 @@ def get_video_calls_duration():
 
     with col_1:
         content_tabs = sac.tabs([
-            sac.TabsItem('Dag', tag='Dag'),
-            sac.TabsItem('Uge', tag='Uge'),
-            sac.TabsItem('Måned', tag='Måned'),
+            sac.TabsItem('Dag', tag='Dag', icon='calendar-day'),
+            sac.TabsItem('Uge', tag='Uge', icon='calendar-week'),
+            sac.TabsItem('Måned', tag='Måned', icon='calendar-month'),
         ], color='dark', size='md', position='top', align='start', use_container_width=True)
 
     try:
