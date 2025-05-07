@@ -18,8 +18,11 @@ RUN apt-get update && apt-get install --yes --no-install-recommends build-essent
 COPY . $HOME
 WORKDIR $HOME
 
+# Set permissions
+RUN chown -R $USER_ID:$GROUP_ID /src && chmod -R 775 /src
+
 # Install python packages
-RUN pip install --upgrade pip
+RUN pip install --upgrade pip setuptools wheel
 RUN pip install -r requirements.txt
 
 # Open port
