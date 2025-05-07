@@ -66,14 +66,30 @@ def get_video_calls():
 
         if content_tabs == 'Dag':
             unique_dates = vdx_data['start_time'].dt.date.unique()
-            selected_date = st.date_input("Vælg en dato", min_value=min(unique_dates), max_value=max(unique_dates), key='date_input', help="Vælg en dato, for hvilken du vil se dataene.")
+            min_date, max_date = min(unique_dates), max(unique_dates)
+
+            if 'date_input' in st.session_state and st.session_state['date_input'] not in unique_dates:
+                st.session_state['date_input'] = min_date
+
+            selected_date = st.date_input(
+                "Vælg en dato",
+                value=st.session_state.get('date_input', min_date),
+                min_value=min_date,
+                max_value=max_date,
+                key='date_input',
+                help="Vælg en dato, for hvilken du vil se dataene."
+            )
 
             daily_data = vdx_data[vdx_data['start_time'].dt.date == selected_date]
 
             total_calls_day = daily_data.shape[0]
             col1, col2 = st.columns([1, 2])
             with col1:
-                ui.metric_card(title="Samlet antal møder (Dag)", content=total_calls_day, description=f"Antal møder, der blev afholdt den {selected_date}.")
+                ui.metric_card(
+                    title="Samlet antal møder (Dag)",
+                    content=total_calls_day,
+                    description=f"Antal møder, der blev afholdt den {selected_date}."
+                )
 
             daily_data['TimeInterval'] = daily_data['start_time'].dt.floor('30T')
             interval_data = daily_data.groupby('TimeInterval').size().reset_index(name='Antal møder')
@@ -82,7 +98,10 @@ def get_video_calls():
             day_chart = alt.Chart(interval_data).mark_bar().encode(
                 x=alt.X('TimeInterval:T', title='Tidspunkt', axis=alt.Axis(format='%H:%M')),
                 y=alt.Y('Antal møder:Q', title='Antal møder'),
-                tooltip=[alt.Tooltip('TimeInterval:T', title='Tidspunkt', format='%H:%M'), alt.Tooltip('Antal møder:Q', title='Antal møder')]
+                tooltip=[
+                    alt.Tooltip('TimeInterval:T', title='Tidspunkt', format='%H:%M'),
+                    alt.Tooltip('Antal møder:Q', title='Antal møder')
+                ]
             ).properties(
                 height=700,
                 width=900

@@ -66,7 +66,19 @@ def get_video_calls_duration():
 
         if content_tabs == 'Dag':
             unique_dates = vdx_data['start_time'].dt.date.unique()
-            selected_date = st.date_input("Vælg en dato", min_value=min(unique_dates), max_value=max(unique_dates), key='date_input', help="Vælg en dato, for hvilken du vil se dataene.")
+            min_date, max_date = min(unique_dates), max(unique_dates)
+
+            if 'date_input' in st.session_state and st.session_state['date_input'] not in unique_dates:
+                st.session_state['date_input'] = min_date
+
+            selected_date = st.date_input(
+                "Vælg en dato",
+                value=st.session_state.get('date_input', min_date),
+                min_value=min_date,
+                max_value=max_date,
+                key='date_input',
+                help="Vælg en dato, for hvilken du vil se dataene."
+            )
 
             daily_data = vdx_data[vdx_data['start_time'].dt.date == selected_date]
 
@@ -77,7 +89,11 @@ def get_video_calls_duration():
                     avg_duration_day_display = "Ingen data"
                 else:
                     avg_duration_day_display = format_duration(int(avg_duration_day))
-                ui.metric_card(title="Gennemsnitlig varighed (Dag)", content=avg_duration_day_display, description="Gennemsnitlig varighed af møder på den valgte dato.")
+                ui.metric_card(
+                    title="Gennemsnitlig varighed (Dag)",
+                    content=avg_duration_day_display,
+                    description="Gennemsnitlig varighed af møder på den valgte dato."
+                )
 
             if not daily_data.empty:
                 daily_data['TimeInterval'] = daily_data['start_time'].dt.floor('30T')
@@ -87,7 +103,10 @@ def get_video_calls_duration():
                 day_chart = alt.Chart(interval_data).mark_bar().encode(
                     x=alt.X('TimeInterval:T', title='Tidspunkt', axis=alt.Axis(format='%H:%M')),
                     y=alt.Y('Gennemsnitlig varighed:Q', title='Gennemsnitlig varighed (minutter)', scale=alt.Scale(domain=[0, interval_data['Gennemsnitlig varighed'].max() / 60])),
-                    tooltip=[alt.Tooltip('TimeInterval:T', title='Tidspunkt', format='%H:%M'), alt.Tooltip('Gennemsnitlig varighed:Q', title='Gennemsnitlig varighed', format='.2f')]
+                    tooltip=[
+                        alt.Tooltip('TimeInterval:T', title='Tidspunkt', format='%H:%M'),
+                        alt.Tooltip('Gennemsnitlig varighed:Q', title='Gennemsnitlig varighed', format='.2f')
+                    ]
                 ).transform_calculate(
                     "Gennemsnitlig varighed", "datum['Gennemsnitlig varighed'] / 60"
                 ).properties(
