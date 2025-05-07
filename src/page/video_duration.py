@@ -3,6 +3,7 @@ import streamlit_antd_components as sac
 import pandas as pd
 import altair as alt
 from utils.vdx_data import get_vdx_data, retrieve_weekday_names, format_duration
+from utils.azure_ad_data import get_user_department
 import streamlit_shadcn_ui as ui
 
 weekday = retrieve_weekday_names()
@@ -30,6 +31,36 @@ def get_video_calls_duration():
         vdx_data = st.session_state.vdx_data
         vdx_data['start_time'] = pd.to_datetime(vdx_data['start_time'])
         vdx_data['Year'] = vdx_data['start_time'].dt.year
+
+        user_departments = get_user_department()
+        if not user_departments:
+            st.warning("Ingen afdelinger fundet.")
+            return
+
+        for user in user_departments:
+            user['mail'] = user['mail'].lower()
+
+        vdx_data['meeting_organized_by_name'] = vdx_data['meeting_organized_by_name'].str.lower()
+
+        valid_departments = set(
+            user['officeLocation'] for user in user_departments
+            if user['mail'] in vdx_data['meeting_organized_by_name'].values
+        )
+        department_options = ["Alle afdelinger"] + list(valid_departments)
+
+        selected_department = st.selectbox("Vælg en afdeling", department_options, help="Vælg en afdeling for at filtrere data.")
+
+        if selected_department != "Alle afdelinger":
+            department_users = [user['mail'] for user in user_departments if user['officeLocation'] == selected_department]
+            filtered_data = vdx_data[vdx_data['meeting_organized_by_name'].isin(department_users)]
+
+            employee_options = ["Alle medarbejdere"] + list(set(filtered_data['meeting_organized_by_name']))
+            selected_employee = st.selectbox("Vælg en medarbejder", employee_options, help="Vælg en medarbejder for at filtrere data.")
+
+            if selected_employee != "Alle medarbejdere":
+                vdx_data = filtered_data[filtered_data['meeting_organized_by_name'] == selected_employee]
+            else:
+                vdx_data = filtered_data
 
         unique_years = sorted(vdx_data['Year'].unique(), reverse=True)
 
