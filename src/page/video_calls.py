@@ -5,6 +5,7 @@ import altair as alt
 from utils.vdx_data import get_vdx_data, retrieve_weekday_names
 import streamlit_shadcn_ui as ui
 from utils.azure_ad_data import get_user_department
+import datetime
 
 weekday = retrieve_weekday_names()
 
@@ -14,7 +15,6 @@ def get_video_calls():
 
     with col_1:
         content_tabs = sac.tabs([
-            sac.TabsItem('Dag', tag='Dag', icon='calendar-day'),
             sac.TabsItem('Uge', tag='Uge', icon='calendar-week'),
             sac.TabsItem('Måned', tag='Måned', icon='calendar-month'),
         ], color='dark', size='md', position='top', align='start', use_container_width=True)
@@ -64,69 +64,50 @@ def get_video_calls():
 
         unique_years = sorted(vdx_data['Year'].unique(), reverse=True)
 
-        if content_tabs == 'Dag':
-            unique_dates = vdx_data['start_time'].dt.date.unique()
-            min_date, max_date = min(unique_dates), max(unique_dates)
-
-            if 'date_input' in st.session_state and st.session_state['date_input'] not in unique_dates:
-                st.session_state['date_input'] = min_date
-
-            selected_date = st.date_input(
-                "Vælg en dato",
-                value=st.session_state.get('date_input', min_date),
-                min_value=min_date,
-                max_value=max_date,
-                key='date_input',
-                help="Vælg en dato, for hvilken du vil se dataene."
-            )
-
-            daily_data = vdx_data[vdx_data['start_time'].dt.date == selected_date]
-
-            total_calls_day = daily_data.shape[0]
-            col1, col2 = st.columns([1, 2])
-            with col1:
-                ui.metric_card(
-                    title="Samlet antal møder (Dag)",
-                    content=total_calls_day,
-                    description=f"Antal møder, der blev afholdt den {selected_date}."
-                )
-
-            daily_data['TimeInterval'] = daily_data['start_time'].dt.floor('30T')
-            interval_data = daily_data.groupby('TimeInterval').size().reset_index(name='Antal møder')
-
-            st.write(f"## Antal af Møder (Dag) - {selected_date}")
-            day_chart = alt.Chart(interval_data).mark_bar().encode(
-                x=alt.X('TimeInterval:T', title='Tidspunkt', axis=alt.Axis(format='%H:%M')),
-                y=alt.Y('Antal møder:Q', title='Antal møder'),
-                tooltip=[
-                    alt.Tooltip('TimeInterval:T', title='Tidspunkt', format='%H:%M'),
-                    alt.Tooltip('Antal møder:Q', title='Antal møder')
-                ]
-            ).properties(
-                height=700,
-                width=900
-            )
-
-            st.altair_chart(day_chart, use_container_width=True)
-
-        elif content_tabs == 'Uge':
+        if content_tabs == 'Uge':
             vdx_data['Week'] = vdx_data['start_time'].dt.isocalendar().week
             vdx_data['Weekday'] = vdx_data['start_time'].dt.day_name().map(weekday)
 
+            today = datetime.date.today()
+            current_year, current_week, _ = today.isocalendar()
+            default_year = current_year if current_year in unique_years else unique_years[0]
+            filtered_result_year = vdx_data[vdx_data['Year'] == default_year]
+            unique_weeks = filtered_result_year['Week'].sort_values().unique()
+            default_week = current_week if current_week in unique_weeks else unique_weeks[-1]
+
             col1, col2 = st.columns(2)
             with col1:
+                if 'selected_year_week' not in st.session_state:
+                    st.session_state['selected_year_week'] = default_year
+
                 selected_year_week = st.selectbox(
                     "Vælg et år",
                     unique_years,
+                    key='selected_year_week',
                     format_func=lambda x: f'{x}',
-                    index=unique_years.tolist().index(st.session_state['selected_year_week']) if 'selected_year_week' in st.session_state and st.session_state['selected_year_week'] is not None else 0,
-                    key='year_select_week',
                     help="Vælg det år, for hvilket du vil se dataene."
                 )
+
             with col2:
                 filtered_result_year = vdx_data[vdx_data['Year'] == selected_year_week]
                 unique_weeks = filtered_result_year['Week'].sort_values().unique()
-                selected_week = st.selectbox('Vælg en uge', unique_weeks, help="Vælg den uge, for hvilken du vil se dataene.")
+
+                if (
+                    'selected_week' not in st.session_state
+                    or st.session_state['selected_year_week'] != selected_year_week
+                    or st.session_state['selected_week'] not in unique_weeks
+                ):
+                    if default_week in unique_weeks:
+                        st.session_state['selected_week'] = default_week
+                    else:
+                        st.session_state['selected_week'] = unique_weeks[-1] if len(unique_weeks) > 0 else None
+
+                selected_week = st.selectbox(
+                    'Vælg en uge',
+                    unique_weeks,
+                    key='selected_week',
+                    help="Vælg den uge, for hvilken du vil se dataene."
+                )
 
             week_data = filtered_result_year[filtered_result_year['Week'] == selected_week].groupby(['Week', 'Weekday']).size().reset_index(name='Antal møder')
 
@@ -153,20 +134,48 @@ def get_video_calls():
 
             month_names = {1: 'Januar', 2: 'Februar', 3: 'Marts', 4: 'April', 5: 'Maj', 6: 'Juni', 7: 'Juli', 8: 'August', 9: 'September', 10: 'Oktober', 11: 'November', 12: 'December'}
 
+            today = datetime.date.today()
+            current_year = today.year
+            current_month = today.month
+
+            default_year = current_year if current_year in unique_years else unique_years[0]
+            filtered_result_year = vdx_data[vdx_data['Year'] == default_year]
+            unique_months = filtered_result_year['Month'].sort_values().unique()
+            default_month = current_month if current_month in unique_months else unique_months[-1]
+
             col1, col2 = st.columns(2)
             with col1:
+                if 'selected_year_month' not in st.session_state or st.session_state['selected_year_month'] not in unique_years:
+                    st.session_state['selected_year_month'] = default_year
+
                 selected_year_month = st.selectbox(
                     "Vælg et år",
                     unique_years,
                     format_func=lambda x: f'{x}',
-                    index=unique_years.tolist().index(st.session_state['selected_year_month']) if 'selected_year_month' in st.session_state and st.session_state['selected_year_month'] is not None else 0,
                     key='year_select_month',
                     help="Vælg det år, for hvilket du vil se dataene."
                 )
             with col2:
                 filtered_result_year = vdx_data[vdx_data['Year'] == selected_year_month]
                 unique_months = filtered_result_year['Month'].sort_values().unique()
-                selected_month = st.selectbox('Vælg en måned', unique_months, format_func=lambda x: month_names[x], help="Vælg den måned, for hvilken du vil se dataene.")
+
+                if (
+                    'selected_month' not in st.session_state
+                    or st.session_state['selected_year_month'] != selected_year_month
+                    or st.session_state['selected_month'] not in unique_months
+                ):
+                    if default_month in unique_months:
+                        st.session_state['selected_month'] = default_month
+                    else:
+                        st.session_state['selected_month'] = unique_months[-1] if len(unique_months) > 0 else None
+
+                selected_month = st.selectbox(
+                    'Vælg en måned',
+                    unique_months,
+                    format_func=lambda x: month_names[x],
+                    key='selected_month',
+                    help="Vælg den måned, for hvilken du vil se dataene."
+                )
 
             month_data = filtered_result_year[filtered_result_year['Month'] == selected_month].groupby(['Month', 'Månedsdag']).size().reset_index(name='Antal møder')
 
