@@ -93,9 +93,9 @@ def get_video_calls_duration():
                 unique_weeks = filtered_result_year['Week'].sort_values().unique()
 
                 if (
-                    'selected_week' not in st.session_state
-                    or st.session_state['selected_year_week'] != selected_year_week
-                    or st.session_state['selected_week'] not in unique_weeks
+                    'selected_week' not in st.session_state or
+                    st.session_state['selected_year_week'] != selected_year_week or
+                    st.session_state['selected_week'] not in unique_weeks
                 ):
                     if default_week in unique_weeks:
                         st.session_state['selected_week'] = default_week
@@ -172,9 +172,9 @@ def get_video_calls_duration():
                 unique_months = filtered_result_year['Month'].sort_values().unique()
 
                 if (
-                    'selected_month' not in st.session_state
-                    or st.session_state['selected_year_month'] != selected_year_month
-                    or st.session_state['selected_month'] not in unique_months
+                    'selected_month' not in st.session_state or
+                    st.session_state['selected_year_month'] != selected_year_month or
+                    st.session_state['selected_month'] not in unique_months
                 ):
                     if default_month in unique_months:
                         st.session_state['selected_month'] = default_month
