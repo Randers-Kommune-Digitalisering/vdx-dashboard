@@ -121,7 +121,7 @@ def get_video_calls_duration():
                 ui.metric_card(
                     title="Gennemsnitlig varighed (Uge)",
                     content=avg_duration_week_display,
-                    description="Gennemsnitlig varighed af møder i den valgte uge."
+                    description=f"Gennemsnitlig varighed af møder i Uge {selected_week} og År {selected_year_week}."
                 )
 
             week_data_grouped = week_data.groupby(['Week', 'Weekday'])['duration'].mean().reset_index(name='Gennemsnitlig varighed')
@@ -201,7 +201,7 @@ def get_video_calls_duration():
                 ui.metric_card(
                     title="Gennemsnitlig varighed (Måned)",
                     content=avg_duration_month_display,
-                    description="Gennemsnitlig varighed af møder i den valgte måned."
+                    description=f"Gennemsnitlig varighed af møder i {month_names[selected_month]} og År {selected_year_month}."
                 )
 
             month_data_grouped = month_data.groupby(['Month', 'Månedsdag'])['duration'].mean().reset_index(name='Gennemsnitlig varighed')

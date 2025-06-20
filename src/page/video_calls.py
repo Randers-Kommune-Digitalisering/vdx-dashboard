@@ -114,7 +114,7 @@ def get_video_calls():
             total_calls_week = week_data['Antal møder'].sum()
             col1, col2 = st.columns([1, 2])
             with col1:
-                ui.metric_card(title="Samlet antal møder (Uge)", content=int(total_calls_week), description=f"Antal møder, der blev afholdt i Uge {selected_week}.")
+                ui.metric_card(title="Samlet antal møder (Uge)", content=int(total_calls_week), description=f"Antal møder, der blev afholdt i Uge {selected_week} og År {selected_year_week}")
 
             st.write(f"## Antal af Møder (Uge) - {selected_year_week}, Uge {selected_week}")
             week_chart = alt.Chart(week_data).mark_bar().encode(
@@ -182,7 +182,7 @@ def get_video_calls():
             total_calls_month = month_data['Antal møder'].sum()
             col1, col2 = st.columns([1, 2])
             with col1:
-                ui.metric_card(title="Samlet antal møder (Måned)", content=int(total_calls_month), description=f"Antal møder, der blev afholdt i {month_names[selected_month]}.")
+                ui.metric_card(title="Samlet antal møder (Måned)", content=int(total_calls_month), description=f"Antal møder, der blev afholdt i {month_names[selected_month]} og år {selected_year_month} ")
 
             st.write(f"## Antal af Møder (Måned) - {selected_year_month}, Måned {month_names[selected_month]}")
             month_chart = alt.Chart(month_data).mark_bar().encode(
