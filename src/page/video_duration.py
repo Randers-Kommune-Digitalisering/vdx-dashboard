@@ -9,6 +9,7 @@ import datetime
 
 weekday = retrieve_weekday_names()
 
+
 def get_video_calls_duration():
     col_1 = st.columns([1])[0]
 
