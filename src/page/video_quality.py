@@ -3,7 +3,7 @@ import streamlit_antd_components as sac
 import pandas as pd
 import altair as alt
 import streamlit_shadcn_ui as ui
-from utils.vdx_data import get_vdx_data, get_quality_mapping, get_quality_percent
+from utils.vdx_data import get_vdx_data, get_quality_mapping, get_quality_percent, get_month_names
 from utils.azure_ad_data import get_user_department
 
 
@@ -48,6 +48,7 @@ def get_video_calls_quality():
 
         selected_department = st.selectbox("Vælg en afdeling", department_options, help="Vælg en afdeling for at filtrere data.")
 
+        selected_employee = None
         if selected_department != "Alle afdelinger":
             department_users = [user['mail'] for user in user_departments if user['officeLocation'] == selected_department]
             filtered_data = vdx_data[vdx_data['meeting_organized_by_name'].isin(department_users)]
@@ -60,9 +61,25 @@ def get_video_calls_quality():
             else:
                 vdx_data = filtered_data
 
-        month_names = {1: 'Januar', 2: 'Februar', 3: 'Marts', 4: 'April', 5: 'Maj', 6: 'Juni', 7: 'Juli', 8: 'August', 9: 'September', 10: 'Oktober', 11: 'November', 12: 'December'}
+        month_names = get_month_names()
 
         unique_years = sorted(vdx_data['Year'].unique(), reverse=True)
+
+        today = pd.Timestamp.today()
+        default_year = today.year if today.year in unique_years else unique_years[0]
+        filtered_result_year = vdx_data[vdx_data['Year'] == default_year]
+        unique_months = filtered_result_year['Month'].sort_values().unique()
+        default_month = today.month if today.month in unique_months else (unique_months[-1] if len(unique_months) > 0 else None)
+
+        if (
+            'last_selected_department' not in st.session_state or
+            st.session_state['last_selected_department'] != selected_department or
+            ('last_selected_employee' in st.session_state and st.session_state.get('last_selected_employee') != selected_employee)
+        ):
+            st.session_state['selected_year'] = default_year
+            st.session_state['selected_month'] = default_month
+            st.session_state['last_selected_department'] = selected_department
+            st.session_state['last_selected_employee'] = selected_employee
 
         col1, col2 = st.columns(2)
         with col1:
@@ -70,14 +87,34 @@ def get_video_calls_quality():
                 "Vælg et år",
                 unique_years,
                 format_func=lambda x: f'{x}',
-                index=unique_years.tolist().index(st.session_state['selected_year']) if 'selected_year' in st.session_state and st.session_state['selected_year'] is not None else 0,
                 key='year_select',
+                index=unique_years.index(st.session_state['selected_year']) if st.session_state['selected_year'] in unique_years else 0,
                 help="Vælg det år, for hvilket du vil se dataene."
             )
+            st.session_state['selected_year'] = selected_year
+
         with col2:
             filtered_result_year = vdx_data[vdx_data['Year'] == selected_year]
             unique_months = filtered_result_year['Month'].sort_values().unique()
-            selected_month = st.selectbox('Vælg en måned', unique_months, format_func=lambda x: month_names[x], help="Vælg den måned, for hvilken du vil se dataene.")
+            if (
+                'selected_month' not in st.session_state
+                or st.session_state['selected_year'] != selected_year
+                or st.session_state['selected_month'] not in unique_months
+            ):
+                if today.month in unique_months:
+                    st.session_state['selected_month'] = today.month
+                else:
+                    st.session_state['selected_month'] = unique_months[-1] if len(unique_months) > 0 else None
+
+            selected_month = st.selectbox(
+                'Vælg en måned',
+                unique_months,
+                format_func=lambda x: month_names[x],
+                key='month_select',
+                index=list(unique_months).index(st.session_state['selected_month']) if st.session_state['selected_month'] in unique_months else 0,
+                help="Vælg den måned, for hvilken du vil se dataene."
+            )
+            st.session_state['selected_month'] = selected_month
 
         filtered_data = filtered_result_year[filtered_result_year['Month'] == selected_month]
 
@@ -87,8 +124,6 @@ def get_video_calls_quality():
             overall_quality_summary = filtered_data.groupby('overall_quality').size().reset_index(name='Antal møder')
             overall_quality_summary['overall_quality_percent'] = (overall_quality_summary['Antal møder'] / overall_quality_summary['Antal møder'].sum()) * 100
 
-            st.write("## Samlet Kvalitet af VDX Møder")
-
             col1, col2, col3 = st.columns(3)
 
             with col1:
@@ -97,6 +132,8 @@ def get_video_calls_quality():
                 ui.metric_card(title="Middel Kvalitet", content=f"{get_quality_percent(overall_quality_summary, 'Ok'):.2f}%", description="Procent af møder med middel kvalitet.")
             with col3:
                 ui.metric_card(title="Ukendt Kvalitet", content=f"{get_quality_percent(overall_quality_summary, 'Ukendt'):.2f}%", description="Procent af møder med ukendt kvalitet.")
+
+            st.write(f"### Samlet Kvalitet af VDX Møder for {month_names[selected_month]} {selected_year}")
 
             col1, col2 = st.columns(2)
 
