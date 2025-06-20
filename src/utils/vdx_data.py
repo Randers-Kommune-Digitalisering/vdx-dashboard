@@ -63,3 +63,20 @@ def get_quality_percent(overall_quality_summary, quality):
 
 def format_duration(seconds):
     return f"{seconds//3600}:{(seconds % 3600)//60:02}:{seconds % 60:02}"
+
+
+def get_month_names():
+    return {
+        1: 'Januar',
+        2: 'Februar',
+        3: 'Marts',
+        4: 'April',
+        5: 'Maj',
+        6: 'Juni',
+        7: 'Juli',
+        8: 'August',
+        9: 'September',
+        10: 'Oktober',
+        11: 'November',
+        12: 'December'
+    }

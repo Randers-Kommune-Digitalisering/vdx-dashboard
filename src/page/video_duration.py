@@ -2,7 +2,7 @@ import streamlit as st
 import streamlit_antd_components as sac
 import pandas as pd
 import altair as alt
-from utils.vdx_data import get_vdx_data, retrieve_weekday_names, format_duration
+from utils.vdx_data import get_vdx_data, retrieve_weekday_names, format_duration, get_month_names
 from utils.azure_ad_data import get_user_department
 import streamlit_shadcn_ui as ui
 import datetime
@@ -144,7 +144,7 @@ def get_video_calls_duration():
             vdx_data['Month'] = vdx_data['start_time'].dt.month
             vdx_data['Månedsdag'] = vdx_data['start_time'].dt.day.astype(int)
 
-            month_names = {1: 'Januar', 2: 'Februar', 3: 'Marts', 4: 'April', 5: 'Maj', 6: 'Juni', 7: 'Juli', 8: 'August', 9: 'September', 10: 'Oktober', 11: 'November', 12: 'December'}
+            month_names = get_month_names()
 
             today = datetime.date.today()
             current_year = today.year
