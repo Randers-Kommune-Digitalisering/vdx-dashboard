@@ -139,9 +139,13 @@ def get_video_calls():
             current_month = today.month
 
             default_year = current_year if current_year in unique_years else unique_years[0]
+
             filtered_result_year = vdx_data[vdx_data['Year'] == default_year]
             unique_months = filtered_result_year['Month'].sort_values().unique()
-            default_month = current_month if current_month in unique_months else unique_months[-1]
+            if len(unique_months) > 0:
+                default_month = current_month if current_month in unique_months else unique_months[-1]
+            else:
+                default_month = None
 
             col1, col2 = st.columns(2)
             with col1:
@@ -164,18 +168,27 @@ def get_video_calls():
                     st.session_state['selected_year_month'] != selected_year_month or
                     st.session_state['selected_month'] not in unique_months
                 ):
-                    if default_month in unique_months:
-                        st.session_state['selected_month'] = default_month
+                    if len(unique_months) > 0:
+                        if default_month in unique_months:
+                            st.session_state['selected_month'] = default_month
+                        else:
+                            st.session_state['selected_month'] = unique_months[-1]
                     else:
-                        st.session_state['selected_month'] = unique_months[-1] if len(unique_months) > 0 else None
+                        st.session_state['selected_month'] = None
 
-                selected_month = st.selectbox(
+                selected_month_tmp = st.selectbox(
                     'Vælg en måned',
                     unique_months,
                     format_func=lambda x: month_names[x],
-                    key='selected_month',
+                    key=f'select_month_{selected_year_month}',
+                    index=list(unique_months).index(st.session_state['selected_month']) if st.session_state['selected_month'] in unique_months else 0,
                     help="Vælg den måned, for hvilken du vil se dataene."
                 )
+
+                if selected_month_tmp != st.session_state['selected_month']:
+                    st.session_state['selected_month'] = selected_month_tmp
+
+                selected_month = st.session_state['selected_month']
 
             month_data = filtered_result_year[filtered_result_year['Month'] == selected_month].groupby(['Month', 'Månedsdag']).size().reset_index(name='Antal møder')
 
