@@ -97,9 +97,9 @@ def get_video_calls_quality():
             filtered_result_year = vdx_data[vdx_data['Year'] == selected_year]
             unique_months = filtered_result_year['Month'].sort_values().unique()
             if (
-                'selected_month' not in st.session_state
-                or st.session_state['selected_year'] != selected_year
-                or st.session_state['selected_month'] not in unique_months
+                'selected_month' not in st.session_state or
+                st.session_state['selected_year'] != selected_year or
+                st.session_state['selected_month'] not in unique_months
             ):
                 if today.month in unique_months:
                     st.session_state['selected_month'] = today.month
