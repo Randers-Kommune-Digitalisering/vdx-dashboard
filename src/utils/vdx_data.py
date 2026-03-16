@@ -11,6 +11,7 @@ def get_vdx_data():
     try:
         query_params = {
             'start_time__gte': '2024-01-01T00:00:00Z',
+            'limit': '10000'
         }
         response = api_client.make_request(method='get', params=query_params)
         if response:
